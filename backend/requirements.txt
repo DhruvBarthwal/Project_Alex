@@ -1,0 +1,12 @@
+deepgram-sdk
+langchain-google-genai
+fastapi
+uvicorn
+python-dotenv
+langchain
+langgraph
+google-api-python-client
+google-auth
+google-auth-oauthlib
+pydantic
+google-genai
