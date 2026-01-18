@@ -1,6 +1,7 @@
 from langgraph.graph import StateGraph
 from agent.state import AgentState
 from utils.llm_intent import classify_intent
+from agent.nodes.read_email import read_email_node
 from utils.intent_fallback import fallback_intent
 
 def intent_node(state: AgentState):
@@ -21,10 +22,23 @@ def intent_node(state: AgentState):
     state["intent"] = intent
     return state
 
+def router(state: AgentState):
+    return state["intent"]
+
 
 def build_graph():
     graph = StateGraph(AgentState)
     graph.add_node("intent",intent_node)
+    graph.add_node("read_email", read_email_node)
     graph.set_entry_point("intent")
-    graph.set_finish_point("intent")
+    
+    graph.add_conditional_edges(
+        "intent",
+        router,
+        {
+            "READ_EMAIL": "read_email",
+        }
+    )
+    
+    graph.set_finish_point("read_email")
     return graph.compile()

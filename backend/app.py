@@ -18,4 +18,14 @@ def hello():
 @app.post("/voice")
 async def voice_input(payload : VoiceInput):
     result = graph.invoke({"user_input":payload.text})
+    
+    if result.get("intent") == "READ_EMAIL":
+        return {
+            "response": (
+                f"Email is from {result.get('email_from')}.\n"
+                f"Subject: {result.get('email_subject')}.\n\n"
+                f"Content: {result.get("email.body")}"
+            )
+        }
+    
     return result

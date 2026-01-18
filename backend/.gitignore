@@ -82,3 +82,6 @@ token.json
 # ======================
 tmp/
 temp/
+
+credentials.json
+token.json
