@@ -14,4 +14,6 @@ def read_email_node(state):
     state["email_subject"] = email["subject"]
     state["email_body"] = email["body"]
     
+    print("READ NODE EMAIL_ID:", email["id"])
+    
     return state

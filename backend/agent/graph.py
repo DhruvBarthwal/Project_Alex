@@ -1,4 +1,4 @@
-from langgraph.graph import StateGraph
+from langgraph.graph import StateGraph, END
 from agent.state import AgentState
 from utils.llm_intent import classify_intent
 from agent.nodes.read_email import read_email_node
@@ -30,6 +30,7 @@ def build_graph():
     graph = StateGraph(AgentState)
     graph.add_node("intent",intent_node)
     graph.add_node("read_email", read_email_node)
+
     graph.set_entry_point("intent")
     
     graph.add_conditional_edges(
@@ -37,8 +38,10 @@ def build_graph():
         router,
         {
             "READ_EMAIL": "read_email",
+            "DELETE_EMAIL": END,
+            "CONFIRM_SEND": END,
+            "UNKNOWN": END,
         }
     )
     
-    graph.set_finish_point("read_email")
     return graph.compile()

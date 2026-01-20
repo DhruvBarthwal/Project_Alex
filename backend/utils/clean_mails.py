@@ -15,7 +15,7 @@ def html_to_clean_text(html_content: str)-> str:
     for tag in soup(["script", "style", "meta","noscript","head"]):
         tag.decompose()
         
-    text = soup.get_text(seperator=" ")
+    text = soup.get_text(separator=" ")
     
     # Remove URLs
     text = re.sub(r"http\S+", "", text)

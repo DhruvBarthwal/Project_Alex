@@ -27,7 +27,6 @@ def extract_body(payload, depth=0):
         if result:
             return result
 
-    print(f"{indent}❌ No body found at this level")
     return ""
 
 
@@ -60,7 +59,6 @@ def read_latest_email(service):
         elif h["name"] == "Subject":
             subject = h["value"]
 
-    print("🚀 CALLING extract_body()")
     raw_body = extract_body(msg["payload"])
 
     if "<html" in raw_body.lower():
@@ -80,7 +78,7 @@ def read_latest_email(service):
 
 
 def delete_email(service, msg_id):
-    service.users().messages().delete(
+    service.users().messages().trash(
         userId="me",
         id=msg_id
     ).execute()
