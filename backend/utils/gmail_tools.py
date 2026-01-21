@@ -1,6 +1,8 @@
 import base64
 from email.message import EmailMessage
 from utils.clean_mails import html_to_clean_text , clean_email_text
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 def extract_body(payload, depth=0):
     indent = "  " * depth
@@ -85,16 +87,17 @@ def delete_email(service, msg_id):
 
 
 def send_email(service, to, subject, body):
-    message = EmailMessage()
-    message.set_content(body)
-    message["To"] = to
-    message["Subject"] = subject
-
-    encoded = base64.urlsafe_b64encode(
+    message = MIMEMultipart()
+    message["to"] = to
+    message["subject"] = subject
+    
+    message.attach(MIMEText(body, "plain"))
+    
+    raw = base64.urlsafe_b64encode(
         message.as_bytes()
     ).decode()
-
+    
     service.users().messages().send(
-        userId="me",
-        body={"raw": encoded}
+        userId = "me",
+        body = {"raw" : raw}
     ).execute()

@@ -1,18 +1,22 @@
-export async function  sendMessage(text: string, emailId : string | null){
-    console.log("API CALL → text:", text, "email_id:", emailId);
-
-    const res = await fetch("http://localhost:8000/voice", {
-    method : "POST",
-    headers : {"Content-Type" : "application/json"},
+export async function sendMessage(
+  text: string,
+  emailId: string | null,
+  to?: string | null,
+  subject?: string | null,
+  body?: string | null
+) {
+  const res = await fetch("http://localhost:8000/voice", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-        text,
-        email_id : emailId,
+      text,
+      email_id: emailId,
+      to,
+      subject,
+      body,
     }),
-    });
+  });
 
-    if(!res.ok){
-        throw new Error("Backend error");
-    }
-
-    return res.json();
+  if (!res.ok) throw new Error("Backend error");
+  return res.json();
 }

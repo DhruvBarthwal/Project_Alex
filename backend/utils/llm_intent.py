@@ -6,7 +6,7 @@ from utils.intent_fallback import fallback_intent
 VALID_INTENTS = {
     "READ_EMAIL",
     "DELETE_EMAIL",
-    "CREATE_EMAIL",
+    "COMPOSE_EMAIL",
     "CONFIRM_SEND",
     "UNKNOWN",
 }

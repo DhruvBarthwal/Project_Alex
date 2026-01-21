@@ -1,15 +1,23 @@
-from typing import TypedDict
+from typing import TypedDict, Optional, List
 
 class AgentState(TypedDict, total=False):
     user_input : str
     intent : str
+    
+    #email reading
     email_id : str
     email_from : str
     email_subject : str
     email_body : str
-    to : str
     
-    pending_delete : bool
+    #email composing
+    to : Optional[str]
+    subject : Optional[str]
+    body : Optional[str]
+    attachments : Optional[List[str]]
+    awaiting_field : Optional[str]  # stores the previous question asked
+        
+    response: str
     
     
     
