@@ -1,4 +1,4 @@
-export async function sendMessage(
+export async function sendToBackend(
   text: string,
   emailId: string | null,
   to?: string | null,

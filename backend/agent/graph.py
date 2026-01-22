@@ -17,6 +17,7 @@ from agent.nodes.star_mails.unstar_email_node import unstar_email_node
 
 from agent.nodes.undo_mails.untrash_email_node import untrash_email_node
 from agent.nodes.undo_mails.cancel_delete import cancel_delete_node
+from agent.nodes.undo_mails.reset_email import reset_node
 
 from utils.clean_mails import extract_sender
 from utils.llm_intent import classify_intent
@@ -86,6 +87,9 @@ def router(state: AgentState):
     if state.get("intent") == "CANCEL_DELETE":
          return "CANCEL_DELETE"
 
+    if state.get("intent") == "RESET":
+        return "RESET"
+    
     return state["intent"]
 
 def build_graph():
@@ -112,6 +116,7 @@ def build_graph():
     
     graph.add_node("untrash_email",untrash_email_node)
     graph.add_node("cancel_delete", cancel_delete_node)
+    graph.add_node("reset", reset_node)
     
     graph.set_entry_point("intent")
     
@@ -142,6 +147,7 @@ def build_graph():
             
             "UNTRASH_EMAIL": "untrash_email",
             "CANCEL_DELETE": "cancel_delete",
+            "RESET" : "reset",
             
             "UNKNOWN": END,
         }
