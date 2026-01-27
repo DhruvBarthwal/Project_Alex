@@ -4,7 +4,7 @@ from agent.state import AgentState
 from agent.nodes.read_mails.read_email import read_email_node
 from agent.nodes.read_mails.delete_email import delete_email_node
 from agent.nodes.read_mails.confirm_delete import confirm_delete_node
-from agent.nodes.multiRead_mails.read_filtered_emails import read_filtered_emails_node, prev_email_node, next_email_node
+from agent.nodes.multiRead_mails.read_filtered_emails import read_filtered_emails_node
 
 from agent.nodes.send_mails.send_mail import compose_email_node,collect_to_local_node,collect_provider_node,collect_subject_node,collect_body_node,send_email_node
 
@@ -56,6 +56,13 @@ def intent_node(state: AgentState):
             intent = "UNKNOWN"
 
     state["intent"] = intent
+    
+    if state["intent"] == "NEXT_EMAIL":
+        state["navigation"] = "next"
+
+    elif state["intent"] == "PREV_EMAIL":
+        state["navigation"] = "prev"
+        
     return state
 
 
@@ -81,12 +88,10 @@ def router(state: AgentState):
 
         if any(k in text for k in ["no", "cancel", "stop", "don't"]):
             return "RESET" 
-    
-    if state.get("intent") == "NEXT_EMAIL":
-        return "NEXT_EMAIL"
-    
-    if state.get("intent") == "PREV_EMAIL":
-        return "PREV_EMAIL"
+    if state.get("intent") in ["NEXT_EMAIL", "PREV_EMAIL"]:
+        if state.get("sender_filter"):
+            return "READ_FILTERED_EMAILS"
+        return "READ_EMAIL"
     
     if state.get("intent") == "READ_EMAIL":
         if state.get("sender_filter"):
@@ -119,8 +124,7 @@ def build_graph():
     graph.add_node("confirm_delete", confirm_delete_node)
     
     graph.add_node("read_filtered_emails", read_filtered_emails_node)
-    graph.add_node("next_email", next_email_node)
-    graph.add_node("prev_email", prev_email_node)
+
 
 
     graph.add_node("compose_email", compose_email_node)
@@ -140,18 +144,12 @@ def build_graph():
     
     graph.set_entry_point("intent")
     
-    graph.add_edge("next_email", "read_filtered_emails")
-    graph.add_edge("prev_email", "read_filtered_emails")
-
     graph.add_conditional_edges(
         "intent",
         router,
         {
             "READ_EMAIL": "read_email",
             "READ_FILTERED_EMAILS" : "read_filtered_emails",
-            
-            "NEXT_EMAIL": "next_email",
-            "PREV_EMAIL": "prev_email",
         
             "DELETE_EMAIL": "delete_email",
             "COMPOSE_EMAIL" : "compose_email",

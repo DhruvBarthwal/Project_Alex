@@ -1,15 +1,24 @@
 let cachedVoice: SpeechSynthesisVoice | null = null;
 
-function getMaleFriendlyVoice(): SpeechSynthesisVoice | null {
+function getFemaleFriendlyVoice(): SpeechSynthesisVoice | null {
   const voices = window.speechSynthesis.getVoices();
 
-  // Priority list (best → fallback)
   const preferred = [
-    "Google UK English Male",
+    // Chrome / Google
+    "Google UK English Female",
     "Google US English",
-    "Microsoft David",
-    "Microsoft Mark",
-    "Alex", // macOS
+
+    // Microsoft Edge (very natural)
+    "Microsoft Zira",
+    "Microsoft Jenny",
+    "Microsoft Aria",
+
+    // macOS
+    "Samantha",
+    "Victoria",
+
+    // Firefox / generic
+    "English Female",
   ];
 
   for (const name of preferred) {
@@ -19,30 +28,35 @@ function getMaleFriendlyVoice(): SpeechSynthesisVoice | null {
     if (voice) return voice;
   }
 
-  // Fallback: any English male-ish voice
-  return voices.find(v => v.lang.startsWith("en")) || null;
+  return (
+    voices.find(v =>
+      v.lang.startsWith("en") &&
+      /female|woman|zira|samantha|victoria/i.test(v.name)
+    ) ||
+    voices.find(v => v.lang.startsWith("en")) ||
+    null
+  );
 }
 
 export function speak(text: string, onEnd?: () => void) {
   const utterance = new SpeechSynthesisUtterance(text);
 
   if (!cachedVoice) {
-    cachedVoice = getMaleFriendlyVoice();
+    cachedVoice = getFemaleFriendlyVoice();
   }
 
   if (cachedVoice) {
     utterance.voice = cachedVoice;
   }
 
-  // 🎛 Friendly tuning
-  utterance.rate = 0.95;   // slightly slower = calmer
-  utterance.pitch = 0.9;   // lower pitch = male
+  utterance.rate = 0.95;    // calm & human
+  utterance.pitch = 1.2;    // feminine, not robotic
   utterance.volume = 1.0;
 
   utterance.onend = () => {
     onEnd?.();
   };
 
-  window.speechSynthesis.cancel(); // stop overlaps
+  window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
 }

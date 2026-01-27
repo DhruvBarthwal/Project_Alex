@@ -25,7 +25,6 @@ def fallback_intent(text: str) -> str:
         "cancel",
         "don't",
         "do not",
-        "stop",
         "leave it",
         "never mind"
     ]):

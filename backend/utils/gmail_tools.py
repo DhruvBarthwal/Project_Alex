@@ -102,6 +102,19 @@ def send_email(service, to, subject, body):
         body = {"raw" : raw}
     ).execute()
 
+import base64
+
+
+def list_inbox_email_ids(service, limit=10):
+    msgs = service.users().messages().list(
+        userId="me",
+        labelIds=["INBOX"],
+        maxResults=limit
+    ).execute()
+
+    return [m["id"] for m in msgs.get("messages", [])]
+
+
 def read_email_by_id(service, email_id):
     msg = service.users().messages().get(
         userId="me",
@@ -113,33 +126,41 @@ def read_email_by_id(service, email_id):
     subject = from_email = ""
 
     for h in headers:
-        if h["name"] == "Subject":
+        if h["name"].lower() == "subject":
             subject = h["value"]
-        elif h["name"] == "From":
+        elif h["name"].lower() == "from":
             from_email = h["value"]
 
-    # ---- extract body ----
-    body = ""
-
     def extract_body(payload):
-        nonlocal body
+        # Prefer plain text
+        if payload.get("mimeType") == "text/plain":
+            data = payload["body"].get("data")
+            if data:
+                return base64.urlsafe_b64decode(data).decode("utf-8")
 
-        if "parts" in payload:
-            for part in payload["parts"]:
-                extract_body(part)
-        else:
-            if payload.get("mimeType") == "text/plain":
-                data = payload["body"].get("data")
-                if data:
-                    body = base64.urlsafe_b64decode(data).decode("utf-8")
+        # Fallback to HTML
+        if payload.get("mimeType") == "text/html":
+            data = payload["body"].get("data")
+            if data:
+                html = base64.urlsafe_b64decode(data).decode("utf-8")
+                return clean_email_text(html)
 
-    extract_body(msg["payload"])
+        # Recurse
+        for part in payload.get("parts", []):
+            result = extract_body(part)
+            if result:
+                return result
+
+        return ""
+
+    body = extract_body(msg["payload"]) or ""
 
     return {
         "from": from_email,
         "subject": subject,
-        "body": body.strip()
+        "body": body[:500].strip()   # voice-safe limit
     }
+
 
 def star_email(service, email_id):
     service.users().messages().modify(
@@ -156,7 +177,7 @@ def unstar_email(service, email_id):
         userId = "me",
         id = email_id,
         body ={
-            "addLabelsIds" : [],
+            "addLabelIds" : [],
             "removeLabelIds" : ["STARRED"]
         }
     ).execute()

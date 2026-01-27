@@ -1,4 +1,5 @@
 deepgram-sdk
+langchain-groq
 langchain-google-genai
 fastapi
 uvicorn
@@ -11,3 +12,4 @@ google-auth-oauthlib
 pydantic
 google-genai
 beautifulsoup4
+transformers torch

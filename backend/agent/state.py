@@ -20,6 +20,7 @@ class AgentState(TypedDict, total=False):
     awaiting_field : Optional[str]  # stores the previous question asked
     
     #email navigation
+    navigation: Optional[str]
     email_ids : List[str]
     email_index: int
     sender_filter : Optional[str]
