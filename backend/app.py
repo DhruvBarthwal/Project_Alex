@@ -42,12 +42,11 @@ async def voice_input(payload: VoiceInput):
     new_state = {
         **prev_state,
         "user_input": payload.text,
-        "email_id": payload.email_id,
-        "to": payload.to,
-        "subject": payload.subject,
-        "body": payload.body,
     }
     
+    if payload.email_id is not None:
+        new_state["email_id"] = payload.email_id
+        
     result = graph.invoke(new_state)
     
     SESSION[session_id] = result

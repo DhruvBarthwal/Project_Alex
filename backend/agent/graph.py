@@ -26,10 +26,12 @@ def intent_node(state: AgentState):
     print("User input:", state.get("user_input"))
     print("Prev sender:", state.get("sender_filter"))
     print("Awaiting field:", state.get("awaiting_field"))
+    print(f"🔍 STATE AT INTENT ENTRY: to={state.get('to')}, subject={state.get('subject')}, body={state.get('body')}")
 
     if state.get("awaiting_field"):
         if state.get("user_input", "").lower() in ["reset", "cancel", "stop", "exit"]:
             state["intent"] = "RESET"
+        print(f"🔍 STATE BEFORE RETURN: to={state.get('to')}, subject={state.get('subject')}, body={state.get('body')}")
         return state
 
     sender = extract_sender(user_input)
@@ -67,6 +69,8 @@ def intent_node(state: AgentState):
 
 
 def router(state: AgentState):
+    print(f"\n🔀 ROUTER ENTRY: to={state.get('to')}, subject={state.get('subject')}, body={state.get('body')}")
+    
     awaiting = state.get("awaiting_field")
     text = (state.get("user_input") or "").lower()
         
@@ -84,10 +88,12 @@ def router(state: AgentState):
     
     if awaiting == "confirm":
         if any(k in text for k in ["yes", "send", "okay", "confirm"]):
+            print("🔀 ROUTER: Sending to SEND_EMAIL")
             return "SEND_EMAIL"
 
         if any(k in text for k in ["no", "cancel", "stop", "don't"]):
             return "RESET" 
+        
     if state.get("intent") in ["NEXT_EMAIL", "PREV_EMAIL"]:
         if state.get("sender_filter"):
             return "READ_FILTERED_EMAILS"

@@ -43,9 +43,9 @@ def speak_summary(summary : dict) -> str:
         summary.get("Deadlines"),
         "There's no deadline mentioned."
     )
-    parts.appned(deadline)
+    parts.append(deadline)
     
-    return " ".joins(parts)
+    return " ".join(parts)
 
 
 def read_email_node(state):

@@ -1,20 +1,21 @@
 from utils.clean_mails import normalize_username
+from utils.gmail_auth import get_gmail_service
+from utils.gmail_tools import send_email
+
+#---------------------------- Create a mail ----------------------------
 
 def compose_email_node(state):
     
     print("✉️ COMPOSE EMAIL STARTED")
     
-    state["to_local"] = None
-    state["email_provider"] = None
-    state["to"] = None
-    state["subject"] = None
-    state["body"] = None
-
-    state["awaiting_field"] = "to_local"
-    state["intent"] = "COLLECT_TO_LOCAL"
-    state["response"] = "Sure. Who do you want to send the email to?"
+    if state.get("awaiting_field") is None:
+        state["intent"] = "COMPOSE_EMAIL"
+        state["awaiting_field"] = "to_local"
+        state["response"] = "Sure. Who do you want to send the email to?"
 
     return state
+
+#---------------------------- Collect email id ----------------------------
 
 def collect_to_local_node(state):
     print("📛 Collecting email username")
@@ -65,51 +66,55 @@ def collect_provider_node(state):
     state["to"] = full_email
 
     state["awaiting_field"] = "subject"
-    state["intent"] = "COLLECT_SUBJECT"
-
     state["response"] = f"Okay. What is the subject of the email?"
 
     print(" FINAL EMAIL:", full_email)
 
     return state
     
+#---------------------------- Collect subject ----------------------------
 
 def collect_subject_node(state):
     
     print("📝 COLLECTING SUBJECT")
+    print(f"  Before: to={state.get('to')}, subject={state.get('subject')}, body={state.get('body')}" )
+   
     state["subject"] = state["user_input"]
     state["awaiting_field"] = "body"
-    state["intent"] = "COLLECT_BODY"
     state["response"] = "Okay. What should the email say?"
     
-
+    print(f"  After: to={state.get('to')}, subject={state.get('subject')}, body={state.get('body')}")
+    print(f"  Returning state keys: {list(state.keys())}")
+    
     return state
+
+#---------------------------- Collect Body ----------------------------
 
 def collect_body_node(state):
     
     print("📄 COLLECTING BODY")
+    print(f"  Before: to={state.get('to')}, subject={state.get('subject')}, body={state.get('body')}")
+    
     
     state["body"] = state["user_input"]
-    
-    state["to"] = state.get("to")
-    state["to_local"] = state.get("to_local")
-    state["email_provider"] = state.get("email_provider")
-    state["subject"] = state.get("subject")
-    
     state["awaiting_field"] = "confirm"
     state["response"] = "Do you want me to send this email now?"
 
+    print(f"  After: to={state.get('to')}, subject={state.get('subject')}, body={state.get('body')}")
+    print(f"  Returning state keys: {list(state.keys())}")
+    
     return state
 
-from utils.gmail_auth import get_gmail_service
-from utils.gmail_tools import send_email
+#---------------------------- Send Mail ----------------------------
 
 def send_email_node(state):
     print("📤 SENDING EMAIL")
-    print("TO:", state.get("to"))
-    print("SUBJECT:", state.get("subject"))
-    print("BODY:", state.get("body"))
-
+    print(f"  State keys at entry: {list(state.keys())}")
+    print(f"  TO: {state.get('to')}")
+    print(f"  SUBJECT: {state.get('subject')}")
+    print(f"  BODY: {state.get('body')}")
+    print(f"  Full state: {state}")  # This will show everything
+    
     if not state.get("to") or not state.get("body"):
         state["response"] = (
             "Something went wrong. Email details are incomplete. Let's try again."
@@ -128,6 +133,7 @@ def send_email_node(state):
 
     # cleanup
     state["awaiting_field"] = None
+    state["intent"] = None
     state["to"] = None
     state["to_local"] = None
     state["email_provider"] = None
